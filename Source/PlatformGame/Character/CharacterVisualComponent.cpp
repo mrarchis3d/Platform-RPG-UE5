@@ -376,7 +376,7 @@ void UCharacterVisualComponent::DebugAdjustBodySlot(
         }
     }
     else
-    {
+    {                                                                        
         UE_LOG(LogCharacterVisual, Warning,
             TEXT("[Debug] Body slot %s not found in BodyPlanes!"),
             *UEnum::GetValueAsString(Slot));
