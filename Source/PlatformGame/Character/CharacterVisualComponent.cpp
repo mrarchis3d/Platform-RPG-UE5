@@ -265,7 +265,10 @@ UStaticMeshComponent* UCharacterVisualComponent::CreateSlotPlane(
     );
 
     Plane->SetRelativeLocation(Config.RelativeLocation);
-    Plane->SetRelativeRotation(Config.RelativeRotation);
+
+    // Combine the global socket base rotation with the per-slot relative rotation
+    const FRotator CombinedRotation = SocketBaseRotation + Config.RelativeRotation;
+    Plane->SetRelativeRotation(CombinedRotation);
 
     UE_LOG(LogCharacterVisual, Log,
         TEXT("[CharacterVisual] Plane for socket '%s' → WorldPos: %s | RelPos: %s | Scale: %s"),
@@ -352,134 +355,4 @@ void UCharacterVisualComponent::EnsurePlaneMeshLoaded()
     }
 }
 
-// ── Debug Tools ───────────────────────────────────────────────────────────────
 
-void UCharacterVisualComponent::DebugAdjustBodySlot(
-    EBodySlotType Slot,
-    FVector NewLocation,
-    FRotator NewRotation
-)
-{
-    if (TObjectPtr<UStaticMeshComponent>* PlanePtr = BodyPlanes.Find(Slot))
-    {
-        if (UStaticMeshComponent* Plane = PlanePtr->Get())
-        {
-            Plane->SetRelativeLocation(NewLocation);
-            Plane->SetRelativeRotation(NewRotation);
-
-            UE_LOG(LogCharacterVisual, Log,
-                TEXT("[Debug] Body slot %s → Relative: %s, %s | World: %s"),
-                *UEnum::GetValueAsString(Slot),
-                *NewLocation.ToString(),
-                *NewRotation.ToString(),
-                *Plane->GetComponentLocation().ToString());
-        }
-    }
-    else
-    {                                                                        
-        UE_LOG(LogCharacterVisual, Warning,
-            TEXT("[Debug] Body slot %s not found in BodyPlanes!"),
-            *UEnum::GetValueAsString(Slot));
-    }
-}
-
-void UCharacterVisualComponent::DebugAdjustEquipmentSlot(
-    EEquipmentSlotType Slot,
-    FVector NewLocation,
-    FRotator NewRotation
-)
-{
-    if (TObjectPtr<UStaticMeshComponent>* PlanePtr = EquipmentPlanes.Find(Slot))
-    {
-        if (UStaticMeshComponent* Plane = PlanePtr->Get())
-        {
-            Plane->SetRelativeLocation(NewLocation);
-            Plane->SetRelativeRotation(NewRotation);
-
-            UE_LOG(LogCharacterVisual, Log,
-                TEXT("[Debug] Equipment slot %s → Relative: %s, %s | World: %s"),
-                *UEnum::GetValueAsString(Slot),
-                *NewLocation.ToString(),
-                *NewRotation.ToString(),
-                *Plane->GetComponentLocation().ToString());
-        }
-    }
-    else
-    {
-        UE_LOG(LogCharacterVisual, Warning,
-            TEXT("[Debug] Equipment slot %s not found in EquipmentPlanes!"),
-            *UEnum::GetValueAsString(Slot));
-    }
-}
-
-void UCharacterVisualComponent::DebugPrintAllSlotTransforms()
-{
-    UE_LOG(LogCharacterVisual, Log, TEXT("===== [Debug] Body Slot Transforms ====="));
-    for (const auto& Pair : BodyPlanes)
-    {
-        if (const UStaticMeshComponent* Plane = Pair.Value)
-        {
-            const FName ParentSocket = Plane->GetAttachSocketName();
-            UE_LOG(LogCharacterVisual, Log,
-                TEXT("  %s → Socket: %s | RelLoc: %s | RelRot: %s | WorldLoc: %s | Scale: %s"),
-                *UEnum::GetValueAsString(Pair.Key),
-                *ParentSocket.ToString(),
-                *Plane->GetRelativeLocation().ToString(),
-                *Plane->GetRelativeRotation().ToString(),
-                *Plane->GetComponentLocation().ToString(),
-                *Plane->GetRelativeScale3D().ToString());
-        }
-    }
-
-    UE_LOG(LogCharacterVisual, Log, TEXT("===== [Debug] Equipment Slot Transforms ====="));
-    for (const auto& Pair : EquipmentPlanes)
-    {
-        if (const UStaticMeshComponent* Plane = Pair.Value)
-        {
-            const FName ParentSocket = Plane->GetAttachSocketName();
-            UE_LOG(LogCharacterVisual, Log,
-                TEXT("  %s → Socket: %s | RelLoc: %s | RelRot: %s | WorldLoc: %s | Scale: %s"),
-                *UEnum::GetValueAsString(Pair.Key),
-                *ParentSocket.ToString(),
-                *Plane->GetRelativeLocation().ToString(),
-                *Plane->GetRelativeRotation().ToString(),
-                *Plane->GetComponentLocation().ToString(),
-                *Plane->GetRelativeScale3D().ToString());
-        }
-    }
-
-    UE_LOG(LogCharacterVisual, Log,
-        TEXT("  TargetSkeleton: %s | PPU: %.2f"),
-        TargetSkeleton ? *TargetSkeleton->GetName() : TEXT("NULL"),
-        PixelsPerUnit);
-}
-
-void UCharacterVisualComponent::DebugSetPixelsPerUnit(float NewPPU)
-{
-    PixelsPerUnit = FMath::Max(NewPPU, 0.01f);
-    const float EffectivePPU = PixelsPerUnit;
-
-    // Re-scale all existing body planes
-    if (ActiveBodyData)
-    {
-        for (auto& Pair : BodyPlanes)
-        {
-            if (const FBodySlotData* SlotData = ActiveBodyData->BodySlots.Find(Pair.Key))
-            {
-                if (UStaticMeshComponent* Plane = Pair.Value)
-                {
-                    const FVector NewScale(
-                        SlotData->PlaneSize.X / (EffectivePPU * 100.f),
-                        SlotData->PlaneSize.Y / (EffectivePPU * 100.f),
-                        1.f
-                    );
-                    Plane->SetRelativeScale3D(NewScale);
-                }
-            }
-        }
-    }
-
-    UE_LOG(LogCharacterVisual, Log,
-        TEXT("[Debug] PixelsPerUnit changed to %.2f — all planes rescaled."),
-        PixelsPerUnit);
-}

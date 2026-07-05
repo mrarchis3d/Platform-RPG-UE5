@@ -58,33 +58,6 @@ public:
               meta = (DisplayName = "Refresh Body Slot Visibility"))
     void RefreshBodySlotVisibility(EBodySlotType Slot);
 
-    // ── Debug Tools (use during Play to adjust without restarting) ──────────
-
-    /** Moves/rotates a body-slot plane in real time. Call from Blueprint during play.
-     *  Once you find the right values, copy them into the DataAsset. */
-    UFUNCTION(BlueprintCallable, Category = "Character|Visual|Debug",
-              meta = (DisplayName = "[Debug] Adjust Body Slot",
-                      DevelopmentOnly))
-    void DebugAdjustBodySlot(EBodySlotType Slot, FVector NewLocation, FRotator NewRotation);
-
-    /** Moves/rotates an equipment-slot plane in real time. */
-    UFUNCTION(BlueprintCallable, Category = "Character|Visual|Debug",
-              meta = (DisplayName = "[Debug] Adjust Equipment Slot",
-                      DevelopmentOnly))
-    void DebugAdjustEquipmentSlot(EEquipmentSlotType Slot, FVector NewLocation, FRotator NewRotation);
-
-    /** Prints the world & relative transform of every active plane to the Output Log. */
-    UFUNCTION(BlueprintCallable, Category = "Character|Visual|Debug",
-              meta = (DisplayName = "[Debug] Print All Slot Transforms",
-                      DevelopmentOnly))
-    void DebugPrintAllSlotTransforms();
-
-    /** Change PixelsPerUnit at runtime and re-scale all existing planes. */
-    UFUNCTION(BlueprintCallable, Category = "Character|Visual|Debug",
-              meta = (DisplayName = "[Debug] Set Pixels Per Unit",
-                      DevelopmentOnly))
-    void DebugSetPixelsPerUnit(float NewPPU);
-
     /** Material used when no specific template is provided. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Visual",
               meta = (DisplayName = "Fallback Material"))
@@ -96,6 +69,13 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character|Visual",
               meta = (DisplayName = "Pixels Per Unit", ClampMin = "0.01"))
     float PixelsPerUnit = 5.f;
+
+    /** Base rotation applied to ALL socket-attached planes before their individual
+     *  RelativeRotation. Set this in the Blueprint to orient all visuals correctly
+     *  (e.g. 90, 0, 270 to face the camera in a 2.5D setup). */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character|Visual",
+              meta = (DisplayName = "Socket Base Rotation"))
+    FRotator SocketBaseRotation = FRotator::ZeroRotator;
 
 protected:
 
