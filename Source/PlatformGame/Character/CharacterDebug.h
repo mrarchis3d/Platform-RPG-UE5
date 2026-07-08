@@ -36,5 +36,10 @@ public:
 	TMap<EEquipmentSlotType, TObjectPtr<UEquipmentDataAsset>> PreviewEquipment;
 
 protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+
+private:
+	/** Shared init: creates body + equipment cards from the preview DataAssets. */
+	void InitializePreview();
 };

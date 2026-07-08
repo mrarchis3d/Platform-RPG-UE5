@@ -11,14 +11,22 @@ ACharacterDebug::ACharacterDebug()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
+void ACharacterDebug::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	InitializePreview();
+}
+
 void ACharacterDebug::BeginPlay()
 {
 	Super::BeginPlay();
+	InitializePreview();
+}
 
+void ACharacterDebug::InitializePreview()
+{
 	if (!PreviewBodyData)
 	{
-		UE_LOG(LogCharacterVisual, Warning,
-			TEXT("[CharacterDebug] No PreviewBodyData assigned — cards won't be visible."));
 		return;
 	}
 
@@ -37,3 +45,4 @@ void ACharacterDebug::BeginPlay()
 		*PreviewBodyData->BodyID.ToString(),
 		PreviewEquipment.Num());
 }
+
