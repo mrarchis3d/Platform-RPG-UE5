@@ -2,10 +2,12 @@
 
 #include "CharacterBase.h"
 #include "CharacterVisualComponent.h"
+#include "CharacterMovementInput.h"
 #include "../PlatformGameLogs.h"
 #include "Data/BodyDataAsset.h"
 #include "Data/EquipmentDataAsset.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 ACharacterBase::ACharacterBase()
@@ -14,11 +16,31 @@ ACharacterBase::ACharacterBase()
 
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+    if (UCharacterMovementComponent* CMC = GetCharacterMovement())
+    {
+        CMC->MaxAcceleration = 999999.f;
+        CMC->BrakingDecelerationWalking = 999999.f;
+        CMC->GroundFriction = 999999.f;
+        CMC->BrakingFrictionFactor = 1.f;
+        CMC->bUseSeparateBrakingFriction = false;
+
+        CMC->MaxWalkSpeed = 600.f;
+
+        CMC->JumpZVelocity = 800.f;
+        CMC->AirControl = 0.8f;
+        CMC->FallingLateralFriction = 0.f;
+
+        CMC->SetPlaneConstraintEnabled(true);
+        CMC->SetPlaneConstraintAxisSetting(EPlaneConstraintAxisSetting::X);
+    }
+
     VisualComponent = CreateDefaultSubobject<UCharacterVisualComponent>(TEXT("VisualComponent"));
     if (VisualComponent)
     {
         VisualComponent->SetupAttachment(GetRootComponent());
     }
+
+    MovementInputComponent = CreateDefaultSubobject<UCharacterMovementInput>(TEXT("MovementInput"));
 }
 
 void ACharacterBase::InitializeBody(UBodyDataAsset* BodyDataAsset)

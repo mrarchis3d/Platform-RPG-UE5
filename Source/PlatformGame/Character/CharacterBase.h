@@ -8,6 +8,7 @@
 #include "CharacterBase.generated.h"
 
 class UCharacterVisualComponent;
+class UCharacterMovementInput;
 class UBodyDataAsset;
 class UEquipmentDataAsset;
 class USkeletalMeshComponent;
@@ -20,22 +21,18 @@ class PLATFORMGAME_API ACharacterBase : public ACharacter
 public:
     ACharacterBase();
 
-    /** Assigns the skeleton and builds body-part planes from the DataAsset. */
     UFUNCTION(BlueprintCallable, Category = "Character",
               meta = (DisplayName = "Initialize Body"))
     void InitializeBody(UBodyDataAsset* BodyDataAsset);
 
-    /** Equips a piece of equipment in the given slot. Pass the DataAsset directly. */
     UFUNCTION(BlueprintCallable, Category = "Character|Equipment",
               meta = (DisplayName = "Equip"))
     void Equip(EEquipmentSlotType Slot, UEquipmentDataAsset* EquipmentData);
 
-    /** Removes the equipment from the given slot. */
     UFUNCTION(BlueprintCallable, Category = "Character|Equipment",
               meta = (DisplayName = "Unequip"))
     void Unequip(EEquipmentSlotType Slot);
 
-    /** Removes all equipped items. */
     UFUNCTION(BlueprintCallable, Category = "Character|Equipment",
               meta = (DisplayName = "Clear Equipment"))
     void ClearEquipment();
@@ -45,6 +42,13 @@ public:
     UCharacterVisualComponent* GetVisualComponent() const
     {
         return VisualComponent;
+    }
+
+    UFUNCTION(BlueprintPure, Category = "Character|Input",
+              meta = (DisplayName = "Get Movement Input Component"))
+    UCharacterMovementInput* GetMovementInputComponent() const
+    {
+        return MovementInputComponent;
     }
 
     UFUNCTION(BlueprintPure, Category = "Character|Equipment",
@@ -58,7 +62,11 @@ protected:
                       AllowPrivateAccess = "true"))
     TObjectPtr<UCharacterVisualComponent> VisualComponent;
 
-    /** Local map of currently equipped items (slot -> DataAsset). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components",
+              meta = (DisplayName = "Movement Input",
+                      AllowPrivateAccess = "true"))
+    TObjectPtr<UCharacterMovementInput> MovementInputComponent;
+
     UPROPERTY(Transient)
     TMap<EEquipmentSlotType, TObjectPtr<UEquipmentDataAsset>> EquippedItems;
 };
