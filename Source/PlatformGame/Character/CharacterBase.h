@@ -29,7 +29,7 @@ public:
               meta = (DisplayName = "Equip"))
     void Equip(EEquipmentSlotType Slot, UEquipmentDataAsset* EquipmentData);
 
-    UFUNCTION(BlueprintCallable, Category = "Character|Equipment",
+    UFUNCTION(BlueprintCallable, Category = "Character|Equipment", 
               meta = (DisplayName = "Unequip"))
     void Unequip(EEquipmentSlotType Slot);
 

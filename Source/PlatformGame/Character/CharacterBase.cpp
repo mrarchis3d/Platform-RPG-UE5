@@ -24,7 +24,7 @@ ACharacterBase::ACharacterBase()
         CMC->BrakingFrictionFactor = 1.f;
         CMC->bUseSeparateBrakingFriction = false;
 
-        CMC->MaxWalkSpeed = 600.f;
+        CMC->MaxWalkSpeed = 120.f;
 
         CMC->JumpZVelocity = 800.f;
         CMC->AirControl = 0.8f;

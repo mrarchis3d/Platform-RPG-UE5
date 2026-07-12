@@ -3,8 +3,6 @@
 #include "CharacterMovementInput.h"
 
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputMappingContext.h"
 #include "InputAction.h"
 #include "GameFramework/Character.h"
 #include "../PlatformGameLogs.h"
@@ -20,43 +18,16 @@ void UCharacterMovementInput::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AddMappingContext();
+	// Set initial rotation to match bIsFacingRight
+	if (ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner()))
+	{
+		const float InitialYaw = bIsFacingRight ? 90.f : -90.f;
+		CharacterOwner->SetActorRotation(FRotator(0.f, InitialYaw, 0.f));
+	}
+
 	BindInputActions();
 }
 
-void UCharacterMovementInput::AddMappingContext()
-{
-	if (!DefaultMappingContext)
-	{
-		UE_LOG(LogCharacterInput, Warning,
-			TEXT("[CharacterMovementInput] DefaultMappingContext is null – skipping."));
-		return;
-	}
-
-	const APawn* PawnOwner = Cast<APawn>(GetOwner());
-	if (!PawnOwner)
-	{
-		return;
-	}
-
-	const APlayerController* PC = Cast<APlayerController>(PawnOwner->GetController());
-	if (!PC)
-	{
-		return;
-	}
-
-	UEnhancedInputLocalPlayerSubsystem* Subsystem =
-		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
-
-	if (!Subsystem)
-	{
-		return;
-	}
-
-	Subsystem->AddMappingContext(DefaultMappingContext, MappingContextPriority);
-}
-
-// ─── Action Bindings 
 void UCharacterMovementInput::BindInputActions()
 {
 	const APawn* PawnOwner = Cast<APawn>(GetOwner());
@@ -65,17 +36,9 @@ void UCharacterMovementInput::BindInputActions()
 		return;
 	}
 
-	const APlayerController* PC = Cast<APlayerController>(PawnOwner->GetController());
-	if (!PC)
-	{
-		return;
-	}
-
 	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PawnOwner->InputComponent);
 	if (!EIC)
 	{
-		UE_LOG(LogCharacterInput, Warning,
-			TEXT("[CharacterMovementInput] No EnhancedInputComponent found on owner."));
 		return;
 	}
 
@@ -86,11 +49,6 @@ void UCharacterMovementInput::BindInputActions()
 		EIC->BindAction(MoveAction, ETriggerEvent::Completed, this,
 			&UCharacterMovementInput::HandleMove);
 	}
-	else
-	{
-		UE_LOG(LogCharacterInput, Warning,
-			TEXT("[CharacterMovementInput] MoveAction is null – movement not bound."));
-	}
 
 	if (JumpAction)
 	{
@@ -98,11 +56,6 @@ void UCharacterMovementInput::BindInputActions()
 			&UCharacterMovementInput::HandleJumpStarted);
 		EIC->BindAction(JumpAction, ETriggerEvent::Completed, this,
 			&UCharacterMovementInput::HandleJumpCompleted);
-	}
-	else
-	{
-		UE_LOG(LogCharacterInput, Warning,
-			TEXT("[CharacterMovementInput] JumpAction is null – jump not bound."));
 	}
 }
 
@@ -118,6 +71,8 @@ void UCharacterMovementInput::HandleMove(const FInputActionValue& Value)
 
 	const FVector RightDirection = FVector::YAxisVector;
 	CharacterOwner->AddMovementInput(RightDirection, MoveInputValue);
+
+	UpdateFacingDirection();
 }
 
 void UCharacterMovementInput::HandleJumpStarted(const FInputActionValue& /*Value*/)
@@ -140,4 +95,29 @@ void UCharacterMovementInput::HandleJumpCompleted(const FInputActionValue& /*Val
 	}
 
 	CharacterOwner->StopJumping();
+}
+
+void UCharacterMovementInput::UpdateFacingDirection()
+{
+	if (FMath::IsNearlyZero(MoveInputValue))
+	{
+		return;
+	}
+
+	ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner());
+	if (!CharacterOwner)
+	{
+		return;
+	}
+
+	const bool bWantsRight = MoveInputValue > 0.f;
+
+	if (bWantsRight == bIsFacingRight)
+	{
+		return;
+	}
+
+	bIsFacingRight = bWantsRight;
+	const float TargetYaw = bIsFacingRight ? 90.f : -90.f;
+	CharacterOwner->SetActorRotation(FRotator(0.f, TargetYaw, 0.f));
 }
