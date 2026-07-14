@@ -35,12 +35,12 @@ protected:
 	TObjectPtr<UInputAction> JumpAction;
 
 private:
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Input",
+	UPROPERTY(VisibleAnywhere, Category = "Input",
 			  meta = (AllowPrivateAccess = "true",
 			          DisplayName = "Move Input Value"))
 	float MoveInputValue = 0.f;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Input",
+	UPROPERTY(VisibleAnywhere, Category = "Input",
 			  meta = (AllowPrivateAccess = "true",
 			          DisplayName = "Is Facing Right"))
 	bool bIsFacingRight = true;

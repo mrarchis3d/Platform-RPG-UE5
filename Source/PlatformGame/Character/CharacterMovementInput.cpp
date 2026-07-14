@@ -110,6 +110,12 @@ void UCharacterMovementInput::UpdateFacingDirection()
 		return;
 	}
 
+	const float GroundSpeed = CharacterOwner->GetVelocity().Size2D();
+	if (GroundSpeed <= 10.f)
+	{
+		return;
+	}
+
 	const bool bWantsRight = MoveInputValue > 0.f;
 
 	if (bWantsRight == bIsFacingRight)

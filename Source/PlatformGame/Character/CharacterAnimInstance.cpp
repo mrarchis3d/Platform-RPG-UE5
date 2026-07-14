@@ -24,6 +24,9 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (MovementComponent)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MovementComponent->Velocity);
+		UE_LOG(LogTemp, Log,
+		TEXT("[CharacterDebug] Velocity is: '%f'."),
+		GroundSpeed);
 	}
 }
 
