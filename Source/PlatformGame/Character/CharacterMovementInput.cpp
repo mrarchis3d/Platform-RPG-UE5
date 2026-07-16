@@ -2,6 +2,8 @@
 
 #include "CharacterMovementInput.h"
 
+#include "CharacterBase.h"
+#include "TwoWayPlatformHandler.h"
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "GameFramework/Character.h"
@@ -18,7 +20,6 @@ void UCharacterMovementInput::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Set initial rotation to match bIsFacingRight
 	if (ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner()))
 	{
 		const float InitialYaw = bIsFacingRight ? 90.f : -90.f;
@@ -57,6 +58,14 @@ void UCharacterMovementInput::BindInputActions()
 		EIC->BindAction(JumpAction, ETriggerEvent::Completed, this,
 			&UCharacterMovementInput::HandleJumpCompleted);
 	}
+
+	if (DownAction)
+	{
+		EIC->BindAction(DownAction, ETriggerEvent::Triggered, this,
+			&UCharacterMovementInput::HandleDown);
+		EIC->BindAction(DownAction, ETriggerEvent::Completed, this,
+			&UCharacterMovementInput::HandleDown);
+	}
 }
 
 void UCharacterMovementInput::HandleMove(const FInputActionValue& Value)
@@ -77,9 +86,18 @@ void UCharacterMovementInput::HandleMove(const FInputActionValue& Value)
 
 void UCharacterMovementInput::HandleJumpStarted(const FInputActionValue& /*Value*/)
 {
-	ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner());
+	ACharacterBase* CharacterOwner = Cast<ACharacterBase>(GetOwner());
 	if (!CharacterOwner)
 	{
+		return;
+	}
+
+	if (bIsHoldingDown)
+	{
+		if (UTwoWayPlatformHandler* PlatformHandler = CharacterOwner->GetTwoWayPlatformHandler())
+		{
+			PlatformHandler->RequestDropThrough();
+		}
 		return;
 	}
 
@@ -111,7 +129,7 @@ void UCharacterMovementInput::UpdateFacingDirection()
 	}
 
 	const float GroundSpeed = CharacterOwner->GetVelocity().Size2D();
-	if (GroundSpeed <= 10.f)
+	if (GroundSpeed <= 15.f)
 	{
 		return;
 	}
@@ -126,4 +144,9 @@ void UCharacterMovementInput::UpdateFacingDirection()
 	bIsFacingRight = bWantsRight;
 	const float TargetYaw = bIsFacingRight ? 90.f : -90.f;
 	CharacterOwner->SetActorRotation(FRotator(0.f, TargetYaw, 0.f));
+}
+
+void UCharacterMovementInput::HandleDown(const FInputActionValue& Value)
+{
+	bIsHoldingDown = Value.Get<bool>();
 }

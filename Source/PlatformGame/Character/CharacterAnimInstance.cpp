@@ -4,6 +4,7 @@
 #include "CharacterAnimInstance.h"
 
 #include "CharacterBase.h"
+#include "CharacterMovementInput.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -24,9 +25,8 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (MovementComponent)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MovementComponent->Velocity);
-		UE_LOG(LogTemp, Log,
-		TEXT("[CharacterDebug] Velocity is: '%f'."),
-		GroundSpeed);
+		IsFalling = MovementComponent->IsFalling();
+		IsJumpTriggered = IsFalling && MovementComponent->Velocity.Z > 0.f;
 	}
 }
 

@@ -9,6 +9,7 @@
 
 class UCharacterVisualComponent;
 class UCharacterMovementInput;
+class UTwoWayPlatformHandler;
 class UBodyDataAsset;
 class UEquipmentDataAsset;
 class USkeletalMeshComponent;
@@ -51,6 +52,10 @@ public:
         return MovementInputComponent;
     }
 
+    UFUNCTION(BlueprintPure, Category = "Character|Platform",
+              meta = (DisplayName = "Get Two Way Platform Handler"))
+    UTwoWayPlatformHandler* GetTwoWayPlatformHandler() const;
+
     UFUNCTION(BlueprintPure, Category = "Character|Equipment",
               meta = (DisplayName = "Is Slot Equipped"))
     bool IsSlotEquipped(EEquipmentSlotType Slot) const;
@@ -66,6 +71,11 @@ protected:
               meta = (DisplayName = "Movement Input",
                       AllowPrivateAccess = "true"))
     TObjectPtr<UCharacterMovementInput> MovementInputComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components",
+              meta = (DisplayName = "Two Way Platform Handler",
+                      AllowPrivateAccess = "true"))
+    TObjectPtr<UTwoWayPlatformHandler> TwoWayPlatformHandler;
 
     UPROPERTY(Transient)
     TMap<EEquipmentSlotType, TObjectPtr<UEquipmentDataAsset>> EquippedItems;

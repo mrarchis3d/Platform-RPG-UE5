@@ -7,6 +7,7 @@
 #include "CharacterMovementInput.generated.h"
 
 class UInputAction;
+class UTwoWayPlatformHandler;
 struct FInputActionValue;
 
 UCLASS(ClassGroup = (Input), meta = (BlueprintSpawnableComponent))
@@ -34,6 +35,10 @@ protected:
 			  meta = (DisplayName = "Jump Action"))
 	TObjectPtr<UInputAction> JumpAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input",
+			  meta = (DisplayName = "Down Action"))
+	TObjectPtr<UInputAction> DownAction;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Input",
 			  meta = (AllowPrivateAccess = "true",
@@ -50,6 +55,10 @@ private:
 	void HandleMove(const FInputActionValue& Value);
 	void HandleJumpStarted(const FInputActionValue& Value);
 	void HandleJumpCompleted(const FInputActionValue& Value);
+	void HandleDown(const FInputActionValue& Value);
 
 	void UpdateFacingDirection();
+
+	/** Whether the down input is currently held. */
+	bool bIsHoldingDown = false;
 };

@@ -3,6 +3,7 @@
 #include "CharacterBase.h"
 #include "CharacterVisualComponent.h"
 #include "CharacterMovementInput.h"
+#include "TwoWayPlatformHandler.h"
 #include "../PlatformGameLogs.h"
 #include "Data/BodyDataAsset.h"
 #include "Data/EquipmentDataAsset.h"
@@ -41,6 +42,7 @@ ACharacterBase::ACharacterBase()
     }
 
     MovementInputComponent = CreateDefaultSubobject<UCharacterMovementInput>(TEXT("MovementInput"));
+    TwoWayPlatformHandler = CreateDefaultSubobject<UTwoWayPlatformHandler>(TEXT("TwoWayPlatformHandler"));
 }
 
 void ACharacterBase::InitializeBody(UBodyDataAsset* BodyDataAsset)
@@ -115,4 +117,9 @@ void ACharacterBase::ClearEquipment()
 bool ACharacterBase::IsSlotEquipped(EEquipmentSlotType Slot) const
 {
     return EquippedItems.Contains(Slot);
+}
+
+UTwoWayPlatformHandler* ACharacterBase::GetTwoWayPlatformHandler() const
+{
+    return FindComponentByClass<UTwoWayPlatformHandler>();
 }
